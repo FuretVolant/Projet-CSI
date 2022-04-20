@@ -1,0 +1,200 @@
+-- DOMAIN: public.etat
+
+-- DROP DOMAIN IF EXISTS public.etat;
+
+CREATE DOMAIN public.etat
+    AS text;
+
+ALTER DOMAIN public.etat OWNER TO postgres;
+
+ALTER DOMAIN public.etat
+    ADD CONSTRAINT check_etat CHECK (VALUE = 'Soumise'::text OR VALUE = 'Payée'::text OR VALUE = 'En préparation'::text OR VALUE = 'Prête'::text OR VALUE = 'Livrée'::text OR VALUE = 'Abandonnée'::text OR VALUE = 'Annulée'::text);
+
+
+
+
+
+-- DOMAIN: public.statut
+
+-- DROP DOMAIN IF EXISTS public.statut;
+
+CREATE DOMAIN public.statut
+    AS text;
+
+ALTER DOMAIN public.statut OWNER TO postgres;
+
+ALTER DOMAIN public.statut
+    ADD CONSTRAINT check_statut CHECK (VALUE = 'Livreur'::text OR VALUE = 'Préparateur'::text OR VALUE = 'Responsable'::text);
+
+
+
+
+
+
+-- Table: public.client
+
+-- DROP TABLE IF EXISTS public.client;
+
+CREATE TABLE IF NOT EXISTS public.client
+(
+    idclient serial NOT NULL,
+    nomclient character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    prenomclient character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    mailclient character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    points integer NOT NULL DEFAULT 0,
+    bloque boolean DEFAULT false,
+    nbabandons integer DEFAULT 0,
+    mdpclient character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT client_pkey PRIMARY KEY (idclient)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.client
+    OWNER to postgres;
+
+
+
+
+-- Table: public.produit
+
+-- DROP TABLE IF EXISTS public.produit;
+
+CREATE TABLE IF NOT EXISTS public.produit
+(
+    idproduit serial NOT NULL,
+    nomproduit character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    stock integer NOT NULL,
+    quantitereapprovisionnement integer NOT NULL DEFAULT 0,
+    prix double precision NOT NULL,
+    CONSTRAINT produit_pkey PRIMARY KEY (idproduit),
+    CONSTRAINT produit_check CHECK (stock >= 0 AND quantitereapprovisionnement >= 0 AND prix >= 0::double precision)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.produit
+    OWNER to postgres;
+
+
+
+-- Table: public.employe
+
+-- DROP TABLE IF EXISTS public.employe;
+
+CREATE TABLE IF NOT EXISTS public.employe
+(
+    idemploye serial NOT NULL,
+    nomemploye character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    prenomemploye character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    mailemploye character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    statutemploye statut COLLATE pg_catalog."default" NOT NULL,
+    mdpemploye character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT employe_pkey PRIMARY KEY (idemploye)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.employe
+    OWNER to postgres;
+
+
+
+
+
+
+-- Table: public.commande
+
+-- DROP TABLE IF EXISTS public.commande;
+
+CREATE TABLE IF NOT EXISTS public.commande
+(
+    idcommande serial NOT NULL,
+    dateheurecommande date NOT NULL DEFAULT CURRENT_DATE,
+    dateretrait date NOT NULL,
+    horaireretrait timestamp without time zone,
+    etatcommande etat COLLATE pg_catalog."default" NOT NULL DEFAULT 'Soumise'::text,
+    montantcommande numeric NOT NULL,
+    horaireretraitrelle timestamp without time zone,
+    quai integer,
+    preparateur integer,
+    livreur integer,
+    client integer,
+    CONSTRAINT commande_pkey PRIMARY KEY (idcommande),
+    CONSTRAINT commande_client_fkey FOREIGN KEY (client)
+        REFERENCES public.client (idclient) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT commande_livreur_fkey FOREIGN KEY (livreur)
+        REFERENCES public.employe (idemploye) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT commande_preparateur_fkey FOREIGN KEY (preparateur)
+        REFERENCES public.employe (idemploye) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.commande
+    OWNER to postgres;
+
+
+
+
+
+-- Table: public.panier
+
+-- DROP TABLE IF EXISTS public.panier;
+
+CREATE TABLE IF NOT EXISTS public.panier
+(
+    idproduit integer NOT NULL,
+    idclient integer NOT NULL,
+    quantite integer NOT NULL,
+    CONSTRAINT panier_pkey PRIMARY KEY (idproduit, idclient),
+    CONSTRAINT panier_idclient_fkey FOREIGN KEY (idclient)
+        REFERENCES public.client (idclient) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT panier_idproduit_fkey FOREIGN KEY (idproduit)
+        REFERENCES public.produit (idproduit) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.panier
+    OWNER to postgres;
+
+
+
+
+
+
+-- Table: public.estcommande
+
+-- DROP TABLE IF EXISTS public.estcommande;
+
+CREATE TABLE IF NOT EXISTS public.estcommande
+(
+    idproduit integer NOT NULL,
+    idcommande integer NOT NULL,
+    quantite integer NOT NULL,
+    CONSTRAINT estcommande_pkey PRIMARY KEY (idproduit, idcommande),
+    CONSTRAINT estcommande_idcommande_fkey FOREIGN KEY (idcommande)
+        REFERENCES public.commande (idcommande) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT estcommande_idproduit_fkey FOREIGN KEY (idproduit)
+        REFERENCES public.produit (idproduit) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.estcommande
+    OWNER to postgres;
