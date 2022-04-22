@@ -1,18 +1,14 @@
 <?php
 include('db.php');
-// Si l'id n'a pas pu être récupéré ou si l'utilisateur n'est pas connecté
-if(!isset($_GET['id']) || empty($_GET['id']) || !isset($_SESSION['email'])){
-  header("Location:index");
-  exit;
+$liste = pg_query($conn, "SELECT * FROM produit");
+if(isset($_GET['ajouter'])){
+    pg_query($conn, "INSERT INTO panier(idproduit, idclient, quantite) VALUES ('$_GET[id]', $id, '$_POST[quantite]')");
+    header("Location:produits.php?id=".$_GET['id']."&added");
 }
-
-/* if(isset($_POST['submit'])){
-  pg_query($conn, "UPDATE client
-	SET nomclient='$_POST[inputNom]', prenomclient='$_POST[inputPrenom]', mdpclient='$_POST[inputPassword]'
-	WHERE idClient = '$id'");
-  header("Location: index.php");
-} */
-
+if(isset($_GET['id'])){
+    $query_name = pg_query($conn,"SELECT nomproduit FROM produit WHERE idproduit = '$_GET[id]'");
+    $name = pg_fetch_array($query_name);
+}
 ?>
 
 <!doctype html>
@@ -23,14 +19,15 @@ if(!isset($_GET['id']) || empty($_GET['id']) || !isset($_SESSION['email'])){
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Jekyll v3.8.6">
-    <title>Mon compte</title>
+    <title>ToyS'R'Sus</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/4.4/examples/jumbotron/">
 
-
-<!-- Bootstrap core CSS -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    
+
 
     <style>
       .bd-placeholder-img {
@@ -106,43 +103,46 @@ if(!isset($_GET['id']) || empty($_GET['id']) || !isset($_SESSION['email'])){
   <!-- Main jumbotron for a primary marketing message or call to action -->
   <div class="jumbotron" style="background-color:#fff;">
     <div class="container">
-    <form>
-      <br>
-      <h2>Vos coordonnées</h2>
-      <br>
-
-      <div class="form-group row">
-    <label for="staticEmail" class="col-sm-2 col-form-label">Nom : </label>
-    <div class="col-sm-10">
-      <input type="text" name="nom" id="inputNom" class="form-control" value="<?php echo $nom;?>">
+    <form method="post">
+        <br>
+        <h2>Liste des produits</h2>
+        <br>
+        <?php if(isset($_GET['added'])){?><h2 style="color:#90EE90"><font size="3">L'article <?=$name[0]?> a bien été ajouté au panier.</font></h2><?php } ?>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Nom</th>
+                    <th scope="col">En stock</th>
+                    <th scope="col">Prix</th>
+                    <th scope="col">Action</th>
+                    <?php if(!isset($statut)){?><th scope="col">Quantité</th><?php } ?>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                while ($donnees = pg_fetch_array($liste)){
+                ?>
+                <tr>
+                    <td><?= $donnees['nomproduit']; ?></td>
+                    <td><?= $donnees['stock']; ?></td>
+                    <td><?= $donnees['prix']; ?></td>
+                    <?php if(isset($statut)){ if($statut='Responsable'){?><td><a href="clients.php?id=<?=$donnees['idproduit'];?>&modif">Modifier</a></td><?php }}
+                    else {?><td><a href="produits.php?id=<?=$donnees['idproduit'];?>&ajouter">Ajouter au panier</a></td>
+                    <td><select name="quantite" id="quantite" class="form-control">
+                        <?php for($i=1; $i<=$donnees['stock']; $i++){?>
+                        <option value=<?= $i?>><?=$i?></option>
+                        <?php } ?>
+                    </select><?php } ?></td>
+                </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </form>
     </div>
-  </div>
-
-      <div class="form-group row">
-    <label class="col-sm-2 col-form-label">Prénom : </label>
-    <div class="col-sm-10">
-      <input type="text" name="prenom" id="inputPrenom" class="form-control" value="<?php echo $prenom;?>">
-    </div>
-  </div>
-  <div class="form-group row">
-    <label class="col-sm-2 col-form-label">Email : </label>
-    <div class="col-sm-10">
-      <input type="text" name="email" readonly class="form-control-plaintext" id="staticEmail" value="<?php echo $_SESSION['email']; ?>">
-    </div>
-  </div>
-  <div class="form-group row">
-    <label for="inputPassword" class="col-sm-2 col-form-label">Mot de passe : </label>
-    <div class="col-sm-10">
-      <input type="password" name="motdepasse" class="form-control" id="inputPassword" value="<?php echo $mdp; ?>">
-    </div>
-    
-  </div>
-  <center><button name="modifier" type="submit" class="info">Modifier</button></center>
-</form>
-  </div>
   </div>
 
 </main>
+
 
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
       <script>window.jQuery || document.write('<script src="/docs/4.4/assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="/docs/4.4/dist/js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script></body>

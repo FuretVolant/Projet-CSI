@@ -1,18 +1,10 @@
 <?php
 include('db.php');
-// Si l'id n'a pas pu être récupéré ou si l'utilisateur n'est pas connecté
-if(!isset($_GET['id']) || empty($_GET['id']) || !isset($_SESSION['email'])){
-  header("Location:index");
+if(isset($_POST['creer'])){
+  $req = pg_query($conn, "INSERT INTO employe (nomemploye, prenomemploye, mailemploye, statutemploye, mdpemploye) VALUES('$_POST[nom]', '$_POST[prenom]', '$_POST[email]', '$_POST[statut]','$_POST[mdp]')");
+  //header('Location:gestion_utilisateur');
   exit;
 }
-
-/* if(isset($_POST['submit'])){
-  pg_query($conn, "UPDATE client
-	SET nomclient='$_POST[inputNom]', prenomclient='$_POST[inputPrenom]', mdpclient='$_POST[inputPassword]'
-	WHERE idClient = '$id'");
-  header("Location: index.php");
-} */
-
 ?>
 
 <!doctype html>
@@ -23,14 +15,15 @@ if(!isset($_GET['id']) || empty($_GET['id']) || !isset($_SESSION['email'])){
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Jekyll v3.8.6">
-    <title>Mon compte</title>
+    <title>ToyS'R'Sus</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/4.4/examples/jumbotron/">
 
-
-<!-- Bootstrap core CSS -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    
+
 
     <style>
       .bd-placeholder-img {
@@ -52,7 +45,7 @@ if(!isset($_GET['id']) || empty($_GET['id']) || !isset($_SESSION['email'])){
     <link href="jumbotron.css" rel="stylesheet">
   </head>
   <body>
-  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
   <a class="navbar-brand"><b>ToyS'R'Sus</b></a>
   <li class="navbar-toggler" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -103,46 +96,56 @@ if(!isset($_GET['id']) || empty($_GET['id']) || !isset($_SESSION['email'])){
 </nav>
 
 <main role="main">
+
   <!-- Main jumbotron for a primary marketing message or call to action -->
   <div class="jumbotron" style="background-color:#fff;">
     <div class="container">
-    <form>
+    <form method="post">
       <br>
-      <h2>Vos coordonnées</h2>
+      <h2>Création d'un compte d'employé</h2>
       <br>
-
       <div class="form-group row">
-    <label for="staticEmail" class="col-sm-2 col-form-label">Nom : </label>
+    <label class="col-sm-2 col-form-label">Nom : </label>
     <div class="col-sm-10">
-      <input type="text" name="nom" id="inputNom" class="form-control" value="<?php echo $nom;?>">
+      <input type="text" name="nom" id="nom" class="form-control">
     </div>
   </div>
 
       <div class="form-group row">
     <label class="col-sm-2 col-form-label">Prénom : </label>
     <div class="col-sm-10">
-      <input type="text" name="prenom" id="inputPrenom" class="form-control" value="<?php echo $prenom;?>">
+      <input type="text" name="prenom" id="prenom" class="form-control">
     </div>
   </div>
   <div class="form-group row">
     <label class="col-sm-2 col-form-label">Email : </label>
     <div class="col-sm-10">
-      <input type="text" name="email" readonly class="form-control-plaintext" id="staticEmail" value="<?php echo $_SESSION['email']; ?>">
+      <input type="text" name="email" id="email" class="form-control">
     </div>
   </div>
   <div class="form-group row">
-    <label for="inputPassword" class="col-sm-2 col-form-label">Mot de passe : </label>
+    <label class="col-sm-2 col-form-label">Mot de passe : </label>
     <div class="col-sm-10">
-      <input type="password" name="motdepasse" class="form-control" id="inputPassword" value="<?php echo $mdp; ?>">
+      <input type="password" name="mdp" class="form-control" id="mdp">
     </div>
-    
   </div>
-  <center><button name="modifier" type="submit" class="info">Modifier</button></center>
+  <div class="form-group row">
+    <label class="col-sm-2 col-form-label">Statut :</label>
+    <div class="col-sm-10">
+      <select name="statut" id="statut" class="form-control">
+        <option value="Livreur">Livreur</option>
+        <option value="Préparateur">Préparateur</option>
+      </select>
+    </div>
+    </div>
+  <center><button name="creer" type="submit" class="info">Créer</button></center>
+
 </form>
-  </div>
+    </div>
   </div>
 
 </main>
+
 
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
       <script>window.jQuery || document.write('<script src="/docs/4.4/assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="/docs/4.4/dist/js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script></body>

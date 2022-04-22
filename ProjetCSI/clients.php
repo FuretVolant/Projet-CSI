@@ -1,18 +1,36 @@
 <?php
 include('db.php');
-// Si l'id n'a pas pu être récupéré ou si l'utilisateur n'est pas connecté
-if(!isset($_GET['id']) || empty($_GET['id']) || !isset($_SESSION['email'])){
-  header("Location:index");
-  exit;
+$tri=null;
+if(isset($_POST['tri'])){
+    $tri = $_POST['tri'];
 }
 
-/* if(isset($_POST['submit'])){
-  pg_query($conn, "UPDATE client
-	SET nomclient='$_POST[inputNom]', prenomclient='$_POST[inputPrenom]', mdpclient='$_POST[inputPassword]'
-	WHERE idClient = '$id'");
-  header("Location: index.php");
-} */
+switch($tri){
+    case 'Tous' : $liste = pg_query($conn, "SELECT idClient, nomClient, prenomClient, mailClient, bloque FROM client"); break;
+    case 'NonBloqués' : $liste = pg_query($conn, "SELECT idClient, nomClient, prenomClient, mailClient, bloque FROM client WHERE bloque = false"); break;
+    case 'Bloqués' : $liste = pg_query($conn, "SELECT idClient, nomClient, prenomClient, mailClient, bloque FROM client WHERE bloque = true"); break;
+    default : case 'Tous' : $liste = pg_query($conn, "SELECT idClient, nomClient, prenomClient, mailClient, bloque FROM client"); break;
+}
 
+if(isset($_GET['id'])){
+    if(isset($_GET['delete'])){
+        pg_query($conn,"DELETE FROM client WHERE idclient ='$_GET[id]'");
+        header("Location:clients");
+        exit;
+    }
+
+    if(isset($_GET['block'])){
+        pg_query($conn, "UPDATE client set bloque=true WHERE idclient='$_GET[id]'");
+        header("Location:clients");
+        exit;
+    }
+
+    if(isset($_GET['unblock'])){
+        pg_query($conn, "UPDATE client set bloque=false WHERE idclient='$_GET[id]'");
+        header("Location:clients");
+        exit;
+    }
+}
 ?>
 
 <!doctype html>
@@ -23,14 +41,15 @@ if(!isset($_GET['id']) || empty($_GET['id']) || !isset($_SESSION['email'])){
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Jekyll v3.8.6">
-    <title>Mon compte</title>
+    <title>ToyS'R'Sus</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/4.4/examples/jumbotron/">
 
-
-<!-- Bootstrap core CSS -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    
+
 
     <style>
       .bd-placeholder-img {
@@ -106,43 +125,48 @@ if(!isset($_GET['id']) || empty($_GET['id']) || !isset($_SESSION['email'])){
   <!-- Main jumbotron for a primary marketing message or call to action -->
   <div class="jumbotron" style="background-color:#fff;">
     <div class="container">
-    <form>
-      <br>
-      <h2>Vos coordonnées</h2>
-      <br>
+    <form method="post">
+        <br>
+        <h2>Gestion des utilisateurs</h2>
 
-      <div class="form-group row">
-    <label for="staticEmail" class="col-sm-2 col-form-label">Nom : </label>
-    <div class="col-sm-10">
-      <input type="text" name="nom" id="inputNom" class="form-control" value="<?php echo $nom;?>">
+        <div class="col-sm-10">
+            <select name="tri" id="tri" class="form-control" onchange="this.form.submit()">
+                <option value="Tous" <?php if($tri == "Tous"){echo "selected";}?>>Tous les clients</option>
+                <option value="NonBloqués" <?php if($tri == "NonBloqués"){echo "selected";}?>>Clients non-bloqués</option>
+                <option value="Bloqués" <?php if($tri == "Bloqués"){echo "selected";}?>>Clients bloqués</option>
+            </select>
+        </div>
+        <br>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Nom</th>
+                    <th scope="col">Prénom</th>
+                    <th scope="col">Adresse-mail</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                while ($donnees = pg_fetch_array($liste)){
+                ?>
+                <tr>
+                    <td><?= $donnees['nomclient']; ?></td>
+                    <td><?= $donnees['prenomclient']; ?></td>
+                    <td><?= $donnees['mailclient']; ?></td>
+                    <?php if($donnees['bloque']=='f'){?><td><a href="clients.php?id=<?=$donnees['idclient'];?>&block">Bloquer</a></td><?php }
+                    else{?><td><a href="clients.php?id=<?=$donnees['idclient'];?>&unblock">Débloquer</a></td><?php } ?>
+                    <td><a href="clients.php?id=<?= $donnees['idclient'];?>&delete">Supprimer</a></td>
+                </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </form>
     </div>
-  </div>
-
-      <div class="form-group row">
-    <label class="col-sm-2 col-form-label">Prénom : </label>
-    <div class="col-sm-10">
-      <input type="text" name="prenom" id="inputPrenom" class="form-control" value="<?php echo $prenom;?>">
-    </div>
-  </div>
-  <div class="form-group row">
-    <label class="col-sm-2 col-form-label">Email : </label>
-    <div class="col-sm-10">
-      <input type="text" name="email" readonly class="form-control-plaintext" id="staticEmail" value="<?php echo $_SESSION['email']; ?>">
-    </div>
-  </div>
-  <div class="form-group row">
-    <label for="inputPassword" class="col-sm-2 col-form-label">Mot de passe : </label>
-    <div class="col-sm-10">
-      <input type="password" name="motdepasse" class="form-control" id="inputPassword" value="<?php echo $mdp; ?>">
-    </div>
-    
-  </div>
-  <center><button name="modifier" type="submit" class="info">Modifier</button></center>
-</form>
-  </div>
   </div>
 
 </main>
+
 
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
       <script>window.jQuery || document.write('<script src="/docs/4.4/assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="/docs/4.4/dist/js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script></body>
