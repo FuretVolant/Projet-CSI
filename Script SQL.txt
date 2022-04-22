@@ -1,6 +1,6 @@
 -- DOMAIN: public.etat
 
--- DROP DOMAIN IF EXISTS public.etat;
+DROP DOMAIN IF EXISTS public.etat;
 
 CREATE DOMAIN public.etat
     AS text;
@@ -16,7 +16,7 @@ ALTER DOMAIN public.etat
 
 -- DOMAIN: public.statut
 
--- DROP DOMAIN IF EXISTS public.statut;
+DROP DOMAIN IF EXISTS public.statut;
 
 CREATE DOMAIN public.statut
     AS text;
@@ -24,7 +24,7 @@ CREATE DOMAIN public.statut
 ALTER DOMAIN public.statut OWNER TO postgres;
 
 ALTER DOMAIN public.statut
-    ADD CONSTRAINT check_statut CHECK (VALUE = 'Livreur'::text OR VALUE = 'Préparateur'::text OR VALUE = 'Responsable'::text);
+    ADD CONSTRAINT check_statut CHECK (VALUE = 'Employé'::text OR VALUE = 'Responsable'::text);
 
 
 
@@ -33,7 +33,7 @@ ALTER DOMAIN public.statut
 
 -- Table: public.client
 
--- DROP TABLE IF EXISTS public.client;
+DROP TABLE IF EXISTS public.client;
 
 CREATE TABLE IF NOT EXISTS public.client
 (
@@ -58,7 +58,7 @@ ALTER TABLE IF EXISTS public.client
 
 -- Table: public.produit
 
--- DROP TABLE IF EXISTS public.produit;
+DROP TABLE IF EXISTS public.produit;
 
 CREATE TABLE IF NOT EXISTS public.produit
 (
@@ -80,7 +80,7 @@ ALTER TABLE IF EXISTS public.produit
 
 -- Table: public.employe
 
--- DROP TABLE IF EXISTS public.employe;
+DROP TABLE IF EXISTS public.employe;
 
 CREATE TABLE IF NOT EXISTS public.employe
 (
@@ -105,7 +105,7 @@ ALTER TABLE IF EXISTS public.employe
 
 -- Table: public.commande
 
--- DROP TABLE IF EXISTS public.commande;
+DROP TABLE IF EXISTS public.commande;
 
 CREATE TABLE IF NOT EXISTS public.commande
 (
@@ -146,7 +146,7 @@ ALTER TABLE IF EXISTS public.commande
 
 -- Table: public.panier
 
--- DROP TABLE IF EXISTS public.panier;
+DROP TABLE IF EXISTS public.panier;
 
 CREATE TABLE IF NOT EXISTS public.panier
 (
@@ -176,7 +176,7 @@ ALTER TABLE IF EXISTS public.panier
 
 -- Table: public.estcommande
 
--- DROP TABLE IF EXISTS public.estcommande;
+DROP TABLE IF EXISTS public.estcommande;
 
 CREATE TABLE IF NOT EXISTS public.estcommande
 (
