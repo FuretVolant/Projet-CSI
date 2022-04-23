@@ -2,7 +2,7 @@
 include('db.php');
 $total=0;
 $nbproduits=0;
-$liste = pg_query($conn, "SELECT pr.idproduit, pr.nomproduit, pr.prix, pa.quantite FROM produit pr, panier pa WHERE pr.idproduit = pa.idproduit AND pa.idclient='$id'");
+$liste = pg_query($conn, "SELECT pr.idproduit, pr.nomproduit, pr.prix, pa.quantite FROM produit pr, panier pa WHERE pr.idproduit = pa.idproduit AND pa.idclient='$id' ORDER BY pr.nomproduit");
 if(isset($_GET['delete'])){
   pg_query($conn,"DELETE FROM panier WHERE idproduit ='$_GET[id]' AND idclient ='$id'");
   header("Location:panier");

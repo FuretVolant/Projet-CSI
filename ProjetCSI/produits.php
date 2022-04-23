@@ -1,22 +1,44 @@
 <?php
 include('db.php');
 $liste = pg_query($conn, "SELECT * FROM produit ORDER BY nomproduit");
-if(isset($_POST['quantite'])){
-  pg_query($conn, "INSERT INTO panier(idproduit, idclient, quantite) VALUES ('$_POST[idproduit]', '$id', '$_POST[quantite]')");
-  header("Location:produits.php?id=".intval($_POST['idproduit'])."&added");
+
+if(isset($_GET['quantite'])){
+  $idproduit = intval($_GET['id']);
+  $quantite = intval($_GET['quantite']);
+  $check_exist = pg_query($conn, "SELECT * FROM panier WHERE idproduit='$idproduit' AND idclient='$id'");
+  $check_stock = pg_fetch_array(pg_query($conn, "SELECT stock FROM produit WHERE idproduit='$idproduit'"));
+  $stock = $check_stock[0];
+  if(pg_num_rows($check_exist) > 0){
+    $check_current_quantite = pg_fetch_array(pg_query($conn,"SELECT quantite FROM panier WHERE idproduit='$idproduit' AND idclient='$id'"));
+    $current_quantite = $check_current_quantite[0];
+    if($current_quantite+$quantite > $stock){
+      header("Location:produits.php?id=".intval($idproduit)."&error");
+    }
+    else{
+      pg_query($conn, "UPDATE panier SET quantite=(SELECT quantite FROM panier WHERE idproduit='$idproduit' AND idclient='$id')+$quantite WHERE idproduit='$idproduit' AND idclient='$id'");
+      header("Location:produits.php?id=".intval($idproduit)."&added");
+    }
+  }
+  else{
+    if($quantite > $stocl){
+      header("Location:produits.php?id=".intval($idproduit)."&error");
+    }
+    else{
+      pg_query($conn, "INSERT INTO panier(idproduit, idclient, quantite) VALUES ('$idproduit', '$id', '$quantite')");
+      header("Location:produits.php?id=".intval($idproduit)."&added");
+    }
+  }
 }
 
+if(isset($_GET['added'])|| isset($_GET['error']))
+{
+  $nomproduit = pg_fetch_array(pg_query($conn,"SELECT nomproduit FROM produit WHERE idproduit = '$_GET[id]'"));
+}
 
-/* if(isset($_GET['ajouter'])){
-    pg_query($conn, "INSERT INTO panier(idproduit, idclient, quantite) VALUES ('$_GET[id]', '$id', '$quantite')");
-    header("Location:produits.php?id=".$_GET['id']."&added");
-} */
-if(isset($_GET['id'])){
+/* if(isset($_GET['id'])){
     $query_name = pg_query($conn,"SELECT nomproduit FROM produit WHERE idproduit = '$_GET[id]'");
     $name = pg_fetch_array($query_name);
-}
-
-
+} */
 ?>
 
 <!doctype html>
@@ -117,7 +139,8 @@ if(isset($_GET['id'])){
         <br>
         <h2>Liste des produits</h2>
         <br>
-        <?php if(isset($_GET['added'])){?><h2 style="color:#90EE90"><font size="3">L'article <?=$name[0]?> a bien été ajouté au panier.</font></h2><?php } ?>
+        <?php if(isset($_GET['added'])){?><h2 style="color:#90EE90"><font size="3">L'article <?=$nomproduit[0]?> a bien été ajouté au panier.</font></h2><?php } ?>
+        <?php if(isset($_GET['error'])){?><h2 style="color:#FF0000"><font size="3">Il n'y a pas assez de stock pour répondre à votre demande pour cet article : <?=$nomproduit[0]?></font></h2><?php } ?>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -140,9 +163,9 @@ if(isset($_GET['id'])){
                     <td><?= $donnees['prix']; ?></td>
                     <?php if(!isset($statut)){ ?>
                     <td>
-                      <input type="text" name="quantite" id="quantite" class="form-control">
+                      <input type="text" name="quantite<?=$donnees['idproduit']?>" id="quantite<?=$donnees['idproduit']?>" class="form-control">
                     </td>
-                    <td><button name="modifier" type="submit" class="info">Ajouter au panier</button>
+                    <td><a href="" onclick="this.href='produits.php?id=<?=$donnees['idproduit']?>&quantite='+document.getElementById('quantite<?=$donnees['idproduit']?>').value">Ajouter au panier</a>
                     </td>
                     <?php } if(isset($statut)){if($statut!='Employé'){ ?><td><a href="produits_modif.php?id=<?=$donnees['idproduit'];?>">Modifier</a></td> <?php }}?>
                 </tr>
