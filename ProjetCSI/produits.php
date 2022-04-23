@@ -1,16 +1,11 @@
 <?php
 include('db.php');
 $liste = pg_query($conn, "SELECT * FROM produit ORDER BY nomproduit");
-$quantite=1;
-if(isset($_POST['q'])){
-    $quantite=$_POST['q'];
-    if(isset($_GET['ajouter'])){
-        pg_query($conn, "INSERT INTO panier(idproduit, idclient, quantite) VALUES ('$_GET[id]', '$id', '$quantite')");
-        //header("Location:produits.php?id=".$_GET['id']."&added");
-    }
+if(isset($_POST['quantite'])){
+  pg_query($conn, "INSERT INTO panier(idproduit, idclient, quantite) VALUES ('$_POST[idproduit]', '$id', '$_POST[quantite]')");
+  header("Location:produits.php?id=".intval($_POST['idproduit'])."&added");
 }
 
-//problème quand + d'1 produit
 
 /* if(isset($_GET['ajouter'])){
     pg_query($conn, "INSERT INTO panier(idproduit, idclient, quantite) VALUES ('$_GET[id]', '$id', '$quantite')");
@@ -129,28 +124,26 @@ if(isset($_GET['id'])){
                     <th scope="col">Nom</th>
                     <th scope="col">En stock</th>
                     <th scope="col">Prix</th>
-                    <th scope="col">Action</th>
                     <?php if(!isset($statut)){?><th scope="col">Quantité</th><?php } ?>
+                    <?php if(!isset($statut) || (isset($statut) && ($statut=='Responsable'))){?><th scope="col">Action</th><?php }?>
+                    
                 </tr>
             </thead>
             <tbody>
                 <?php
                 while ($donnees = pg_fetch_array($liste)){
                 ?>
-                <tr>
+                <tr><td><input class="form-control-plaintext" type="text" readonly name="idproduit" id="idproduit" value="<?=$donnees['idproduit'];?>"></td>
                     <td><?= $donnees['nomproduit']; ?></td>
                     <td><?= $donnees['stock']; ?></td>
                     <td><?= $donnees['prix']; ?></td>
-                    <?php if(isset($statut)){ if($statut='Responsable'){?><td><a href="produits_modif.php?id=<?=$donnees['idproduit'];?>">Modifier</a></td><?php }}
-                    else {?><td><a href="produits.php?id=<?=$donnees['idproduit'];?>&ajouter">Ajouter au panier</a></td>
+                    <?php if(!isset($statut)){ ?>
                     <td>
-                        <select name="q" class="form-control" onchange="this.form.submit()">
-                            <?php for($i=1; $i<=$donnees['stock']; $i++){?>
-                                <option value=<?=$i?> <?php if(isset($_POST['q'])){ if ($_POST['q'] == $i){echo "selected";}}?>><?=$i?></option>
-                            <?php } ?>
-                        </select>
+                      <input type="text" name="quantite" id="quantite" class="form-control">
                     </td>
-                    <?php } ?>
+                    <td><button name="modifier" type="submit" class="info">Ajouter au panier</button>
+                    </td>
+                    <?php } if(isset($statut)){if($statut!='Employé'){ ?><td><a href="produits_modif.php?id=<?=$donnees['idproduit'];?>">Modifier</a></td> <?php }}?>
                 </tr>
                 <?php } ?>
             </tbody>
