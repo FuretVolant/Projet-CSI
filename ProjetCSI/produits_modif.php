@@ -1,27 +1,14 @@
 <?php
 include('db.php');
-$liste = pg_query($conn, "SELECT * FROM produit ORDER BY nomproduit");
-$quantite=1;
-if(isset($_POST['q'])){
-    $quantite=$_POST['q'];
-    if(isset($_GET['ajouter'])){
-        pg_query($conn, "INSERT INTO panier(idproduit, idclient, quantite) VALUES ('$_GET[id]', '$id', '$quantite')");
-        //header("Location:produits.php?id=".$_GET['id']."&added");
-    }
-}
-
-//problème quand + d'1 produit
-
-/* if(isset($_GET['ajouter'])){
-    pg_query($conn, "INSERT INTO panier(idproduit, idclient, quantite) VALUES ('$_GET[id]', '$id', '$quantite')");
-    header("Location:produits.php?id=".$_GET['id']."&added");
-} */
-if(isset($_GET['id'])){
-    $query_name = pg_query($conn,"SELECT nomproduit FROM produit WHERE idproduit = '$_GET[id]'");
-    $name = pg_fetch_array($query_name);
-}
-
-
+$liste = pg_query($conn, "SELECT * FROM produit WHERE idproduit='$_GET[id]'");
+$donnees = pg_fetch_assoc($liste);
+if(isset($_POST['modifier'])){
+    pg_query($conn, "UPDATE produit
+	SET nomproduit='$_POST[nom]', quantitereapprovisionnement='$_POST[quantite]', prix='$_POST[prix]'
+	WHERE idproduit='$_GET[id]'");
+    header('Location:produits.php');
+    exit;
+  }
 ?>
 
 <!doctype html>
@@ -115,51 +102,42 @@ if(isset($_GET['id'])){
 </nav>
 
 <main role="main">
+
   <!-- Main jumbotron for a primary marketing message or call to action -->
   <div class="jumbotron" style="background-color:#fff;">
     <div class="container">
     <form method="post">
-        <br>
-        <h2>Liste des produits</h2>
-        <br>
-        <?php if(isset($_GET['added'])){?><h2 style="color:#90EE90"><font size="3">L'article <?=$name[0]?> a bien été ajouté au panier.</font></h2><?php } ?>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th scope="col">Nom</th>
-                    <th scope="col">En stock</th>
-                    <th scope="col">Prix</th>
-                    <th scope="col">Action</th>
-                    <?php if(!isset($statut)){?><th scope="col">Quantité</th><?php } ?>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                while ($donnees = pg_fetch_array($liste)){
-                ?>
-                <tr>
-                    <td><?= $donnees['nomproduit']; ?></td>
-                    <td><?= $donnees['stock']; ?></td>
-                    <td><?= $donnees['prix']; ?></td>
-                    <?php if(isset($statut)){ if($statut='Responsable'){?><td><a href="produits_modif.php?id=<?=$donnees['idproduit'];?>">Modifier</a></td><?php }}
-                    else {?><td><a href="produits.php?id=<?=$donnees['idproduit'];?>&ajouter">Ajouter au panier</a></td>
-                    <td>
-                        <select name="q" class="form-control" onchange="this.form.submit()">
-                            <?php for($i=1; $i<=$donnees['stock']; $i++){?>
-                                <option value=<?=$i?> <?php if(isset($_POST['q'])){ if ($_POST['q'] == $i){echo "selected";}}?>><?=$i?></option>
-                            <?php } ?>
-                        </select>
-                    </td>
-                    <?php } ?>
-                </tr>
-                <?php } ?>
-            </tbody>
-        </table>
-    </form>
+      <br>
+      <h2>Modification d'un produit</h2>
+      <br>
+      <div class="form-group row">
+    <label class="col-sm-2 col-form-label">Nom : </label>
+    <div class="col-sm-10">
+      <input type="text" name="nom" id="nom" class="form-control" value="<?= $donnees['nomproduit']?>">
+    </div>
+  </div>
+
+      <div class="form-group row">
+    <label class="col-sm-2 col-form-label">Prix : </label>
+    <div class="col-sm-10">
+      <input type="text" name="prix" id="prix" class="form-control" value="<?= $donnees['prix']?>">
+    </div>
+  </div>
+  <div class="form-group row">
+    <label class="col-sm-2 col-form-label">Quantité réapprovisionnement : </label>
+    <div class="col-sm-10">
+      <input type="text" name="quantite" id="quantite" class="form-control" value="<?= $donnees['quantitereapprovisionnement']?>"> 
+    </div>
+  </div>
+
+  <center><button name="modifier" type="submit" class="info">Modifier</button></center>
+
+</form>
     </div>
   </div>
 
 </main>
+
 
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
       <script>window.jQuery || document.write('<script src="/docs/4.4/assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="/docs/4.4/dist/js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script></body>
