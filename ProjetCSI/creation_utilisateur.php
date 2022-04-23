@@ -45,7 +45,7 @@ if(isset($_POST['creer'])){
     <link href="jumbotron.css" rel="stylesheet">
   </head>
   <body>
-  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
   <a class="navbar-brand"><b>ToyS'R'Sus</b></a>
   <li class="navbar-toggler" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -83,8 +83,6 @@ if(isset($_POST['creer'])){
 
     <form class="form-inline my-2 my-lg-0">
       <?php if(isset($_SESSION['email'])){?>
-      <?php if(!isset($statut)){?><a href="panier.php?id=<?=$id?>" class="btn btn-outline-success my-2 my-sm-0">Panier</a><?php }?>
-      &nbsp;
       <a href="mon_compte.php?id=<?= $id?><?php if(isset($statut)){echo '&?statut='.$statut;}?>" class="btn btn-outline-success my-2 my-sm-0">Mon compte</a>
       &nbsp;
       <a href="logout.php" class="btn btn-outline-success my-2 my-sm-0">Déconnexion</a>

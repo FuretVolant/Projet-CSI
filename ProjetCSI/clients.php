@@ -109,8 +109,6 @@ if(isset($_GET['id'])){
 
     <form class="form-inline my-2 my-lg-0">
       <?php if(isset($_SESSION['email'])){?>
-      <?php if(!isset($statut)){?><a href="panier.php?id=<?=$id?>" class="btn btn-outline-success my-2 my-sm-0">Panier</a><?php }?>
-      &nbsp;
       <a href="mon_compte.php?id=<?= $id?><?php if(isset($statut)){echo '&?statut='.$statut;}?>" class="btn btn-outline-success my-2 my-sm-0">Mon compte</a>
       &nbsp;
       <a href="logout.php" class="btn btn-outline-success my-2 my-sm-0">Déconnexion</a>
