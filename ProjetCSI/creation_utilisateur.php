@@ -1,7 +1,7 @@
 <?php
 include('db.php');
 if(isset($_POST['creer'])){
-  $req = pg_query($conn, "INSERT INTO employe (nomemploye, prenomemploye, mailemploye, statutemploye, mdpemploye) VALUES('$_POST[nom]', '$_POST[prenom]', '$_POST[email]', '$_POST[statut]','$_POST[mdp]')");
+  $req = pg_query($conn, "INSERT INTO employe (nomemploye, prenomemploye, mailemploye, statutemploye, mdpemploye) VALUES('$_POST[nom]', '$_POST[prenom]', '$_POST[email]', 'Employé','$_POST[mdp]')");
   //header('Location:gestion_utilisateur');
   exit;
 }
@@ -45,7 +45,7 @@ if(isset($_POST['creer'])){
     <link href="jumbotron.css" rel="stylesheet">
   </head>
   <body>
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
   <a class="navbar-brand"><b>ToyS'R'Sus</b></a>
   <li class="navbar-toggler" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -83,6 +83,8 @@ if(isset($_POST['creer'])){
 
     <form class="form-inline my-2 my-lg-0">
       <?php if(isset($_SESSION['email'])){?>
+      <?php if(!isset($statut)){?><a href="panier.php?id=<?=$id?>" class="btn btn-outline-success my-2 my-sm-0">Panier</a><?php }?>
+      &nbsp;
       <a href="mon_compte.php?id=<?= $id?><?php if(isset($statut)){echo '&?statut='.$statut;}?>" class="btn btn-outline-success my-2 my-sm-0">Mon compte</a>
       &nbsp;
       <a href="logout.php" class="btn btn-outline-success my-2 my-sm-0">Déconnexion</a>
@@ -129,15 +131,6 @@ if(isset($_POST['creer'])){
       <input type="password" name="mdp" class="form-control" id="mdp">
     </div>
   </div>
-  <div class="form-group row">
-    <label class="col-sm-2 col-form-label">Statut :</label>
-    <div class="col-sm-10">
-      <select name="statut" id="statut" class="form-control">
-        <option value="Livreur">Livreur</option>
-        <option value="Préparateur">Préparateur</option>
-      </select>
-    </div>
-    </div>
   <center><button name="creer" type="submit" class="info">Créer</button></center>
 
 </form>

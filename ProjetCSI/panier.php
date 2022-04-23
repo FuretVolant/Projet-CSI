@@ -1,6 +1,14 @@
 <?php
 include('db.php');
-$liste = pg_query($conn, "SELECT pr.nomproduit, pa.quantite FROM produit pr, panier pa WHERE pr.idproduit = pa.idproduit AND pa.idclient='$id'");
+$total=0;
+$nbproduits=0;
+$liste = pg_query($conn, "SELECT pr.idproduit, pr.nomproduit, pr.prix, pa.quantite FROM produit pr, panier pa WHERE pr.idproduit = pa.idproduit AND pa.idclient='$id'");
+if(isset($_GET['delete'])){
+  pg_query($conn,"DELETE FROM panier WHERE idproduit ='$_GET[id]' AND idclient ='$id'");
+  header("Location:panier");
+  exit;
+}
+
 ?>
 
 <!doctype html>
@@ -94,13 +102,44 @@ $liste = pg_query($conn, "SELECT pr.nomproduit, pa.quantite FROM produit pr, pan
 </nav>
 
 <main role="main">
-
   <!-- Main jumbotron for a primary marketing message or call to action -->
-  <div class="jumbotron">
+  <div class="jumbotron" style="background-color:#fff;">
     <div class="container">
-      <h1 class="display-3"><font size=20>Bonjour <?php if(isset($_SESSION['email'])){echo $prenom." ".$nom; } ?></font></h1>
+    <form method="post">
+        <br>
+        <h2>Mon panier</h2>
+        <br>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Nom</th>
+                    <th scope="col">Quantité</th>
+                    <th scope="col">Prix</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                while ($donnees = pg_fetch_array($liste)){
+                  $total = $total + floatval($donnees['prix']*intval($donnees['quantite']));
+                  $nbproduits = $nbproduits+1;
+                ?>
+                <tr>
+                    <td><?= $donnees['nomproduit']; ?></td>
+                    <td><?= $donnees['prix']; ?></td>
+                    <td><?= $donnees['quantite']; ?></td>
+                    <td><a href="panier.php?id=<?= $donnees['idproduit'];?>&delete">Supprimer</a></td>
+                </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+        <center><button name="commander" type="submit" class="info">Valider le panier</button></center>
+        <h2><font size="3"> Total de la commande : <?= $total?>€</font></h2>
+        <h2><font size="3"> Nombre de produits commandés : <?=$nbproduits?></font></h2>
+    </form>
     </div>
   </div>
+
 </main>
 
 
