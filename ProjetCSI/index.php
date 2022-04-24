@@ -54,12 +54,12 @@ include('db.php');
       </li>
       
       <li class="nav-item active">
-        <a class="nav-link" href="produits">Tous les produits</a>
+        <a class="nav-link" href="produits.php">Tous les produits</a>
       </li>
 
       <?php if(isset ($statut)){?>
       <li class="nav-item active">
-        <a class="nav-link" href="commandes">Commandes</a> 
+        <a class="nav-link" href="">Commandes</a>
       </li>
       <?php }?>
       

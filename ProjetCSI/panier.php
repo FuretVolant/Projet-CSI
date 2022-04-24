@@ -63,7 +63,7 @@ if(isset($_GET['delete'])){
       </li>
       
       <li class="nav-item active">
-        <a class="nav-link" href="produits">Tous les produits</a>
+        <a class="nav-link" href="produits.php">Tous les produits</a>
       </li>
 
       <?php if(isset ($statut)){?>
@@ -105,7 +105,6 @@ if(isset($_GET['delete'])){
   <!-- Main jumbotron for a primary marketing message or call to action -->
   <div class="jumbotron" style="background-color:#fff;">
     <div class="container">
-    <form method="post">
         <br>
         <h2>Mon panier</h2>
         <br>
@@ -122,7 +121,7 @@ if(isset($_GET['delete'])){
                 <?php
                 while ($donnees = pg_fetch_array($liste)){
                   $total = $total + floatval($donnees['prix']*intval($donnees['quantite']));
-                  $nbproduits = $nbproduits+1;
+                  $nbproduits += $donnees['quantite'];
                 ?>
                 <tr>
                     <td><?= $donnees['nomproduit']; ?></td>
@@ -133,10 +132,9 @@ if(isset($_GET['delete'])){
                 <?php } ?>
             </tbody>
         </table>
-        <center><button name="commander" type="submit" class="info">Valider le panier</button></center>
+        <center><a class="btn btn-primary" href="commande.php" role="button">Valider le panier</a></center>
         <h2><font size="3"> Total de la commande : <?= $total?>€</font></h2>
         <h2><font size="3"> Nombre de produits commandés : <?=$nbproduits?></font></h2>
-    </form>
     </div>
   </div>
 
