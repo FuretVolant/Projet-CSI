@@ -110,6 +110,8 @@ if(!isset($_GET['id']) || empty($_GET['id']) || !isset($_SESSION['email'])){
       <br>
       <h2>Vos coordonnées</h2>
       <br>
+      <?php if(!isset($statut)){?> <font size="6"><a href="mes_commandes.php?id=<?=$_GET['id']?>">Mes commandes</a></font><?php } ?>
+      
 
       <div class="form-group row">
     <label for="staticEmail" class="col-sm-2 col-form-label">Nom : </label>
