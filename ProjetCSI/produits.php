@@ -158,7 +158,7 @@ if(isset($_GET['added'])|| isset($_GET['error']))
                 while ($donnees = pg_fetch_array($liste)){
                 ?>
                 <tr><td><input class="form-control-plaintext" type="text" readonly name="idproduit" id="idproduit" value="<?=$donnees['idproduit'];?>"></td>
-                    <td><?= $donnees['nomproduit']; ?></td>
+                    <td><a href="affiche_produit.php?id=<?=$donnees['idproduit']?>"><?= $donnees['nomproduit']; ?></a></td>
                     <td><?= $donnees['stock']; ?></td>
                     <td><?= $donnees['prix']; ?></td>
                     <?php if(!isset($statut)){ ?>

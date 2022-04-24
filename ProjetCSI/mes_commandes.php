@@ -6,30 +6,10 @@ if(isset($_POST['tri'])){
 }
 
 switch($tri){
-    case 'Tous' : $liste = pg_query($conn, "SELECT idClient, nomClient, prenomClient, mailClient, bloque FROM client"); break;
-    case 'NonBloqués' : $liste = pg_query($conn, "SELECT idClient, nomClient, prenomClient, mailClient, bloque FROM client WHERE bloque = false"); break;
-    case 'Bloqués' : $liste = pg_query($conn, "SELECT idClient, nomClient, prenomClient, mailClient, bloque FROM client WHERE bloque = true"); break;
-    default : $liste = pg_query($conn, "SELECT idClient, nomClient, prenomClient, mailClient, bloque FROM client"); break;
-}
-
-if(isset($_GET['id'])){
-    if(isset($_GET['delete'])){
-        pg_query($conn,"DELETE FROM client WHERE idclient ='$_GET[id]'");
-        header("Location:clients");
-        exit;
-    }
-
-    if(isset($_GET['block'])){
-        pg_query($conn, "UPDATE client set bloque=true WHERE idclient='$_GET[id]'");
-        header("Location:clients");
-        exit;
-    }
-
-    if(isset($_GET['unblock'])){
-        pg_query($conn, "UPDATE client set bloque=false WHERE idclient='$_GET[id]'");
-        header("Location:clients");
-        exit;
-    }
+    case 'Toutes' : $liste = pg_query($conn, "SELECT dateheurecommande, montantcommande, etatcommande FROM Commande WHERE client='$id'"); break;
+    case 'EnCours' : $liste = pg_query($conn, "SELECT dateheurecommande, montantcommande, etatcommande FROM Commande WHERE client='$id' AND etatcommande IN ('Soumise', 'Payée', 'En préparation', 'Prête')"); break;
+    case 'Anciennes' : $liste = pg_query($conn, "SELECT dateheurecommande, montantcommande, etatcommande FROM Commande WHERE client='$id' AND etatcommande IN ('Livrée', 'Abandonnée', 'Annulée')"); break;
+    default : $liste = pg_query($conn, "SELECT dateheurecommande, montantcommande, etatcommande FROM Commande WHERE client='$id'"); break;
 }
 ?>
 
@@ -109,6 +89,8 @@ if(isset($_GET['id'])){
 
     <form class="form-inline my-2 my-lg-0">
       <?php if(isset($_SESSION['email'])){?>
+      <?php if(!isset($statut)){?><a href="panier.php?id=<?=$id?>" class="btn btn-outline-success my-2 my-sm-0">Panier</a><?php }?>
+      &nbsp;
       <a href="mon_compte.php?id=<?= $id?><?php if(isset($statut)){echo '&?statut='.$statut;}?>" class="btn btn-outline-success my-2 my-sm-0">Mon compte</a>
       &nbsp;
       <a href="logout.php" class="btn btn-outline-success my-2 my-sm-0">Déconnexion</a>
@@ -127,23 +109,23 @@ if(isset($_GET['id'])){
     <div class="container">
     <form method="post">
         <br>
-        <h2>Gestion des utilisateurs</h2>
+        <h2>Mes commandes</h2>
+        <br>
 
         <div class="col-sm-10">
             <select name="tri" id="tri" class="form-control" onchange="this.form.submit()">
-                <option value="Tous" <?php if($tri == "Tous"){echo "selected";}?>>Tous les clients</option>
-                <option value="NonBloqués" <?php if($tri == "NonBloqués"){echo "selected";}?>>Clients non-bloqués</option>
-                <option value="Bloqués" <?php if($tri == "Bloqués"){echo "selected";}?>>Clients bloqués</option>
+                <option value="Toutes" <?php if($tri == "Toutes"){echo "selected";}?>>Toutes mes commandes</option>
+                <option value="EnCours" <?php if($tri == "EnCours"){echo "selected";}?>>Commandes en cours</option>
+                <option value="Anciennes" <?php if($tri == "Anciennes"){echo "selected";}?>>Anciennes commandes</option>
             </select>
         </div>
-        <br>
+
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th scope="col">Nom</th>
-                    <th scope="col">Prénom</th>
-                    <th scope="col">Adresse-mail</th>
-                    <th scope="col">Action</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Montant</th>
+                    <th scope="col">Etat</th>
                 </tr>
             </thead>
             <tbody>
@@ -151,12 +133,9 @@ if(isset($_GET['id'])){
                 while ($donnees = pg_fetch_array($liste)){
                 ?>
                 <tr>
-                    <td><?= $donnees['nomclient']; ?></td>
-                    <td><?= $donnees['prenomclient']; ?></td>
-                    <td><?= $donnees['mailclient']; ?></td>
-                    <?php if($donnees['bloque']=='f'){?><td><a href="clients.php?id=<?=$donnees['idclient'];?>&block">Bloquer</a></td><?php }
-                    else{?><td><a href="clients.php?id=<?=$donnees['idclient'];?>&unblock">Débloquer</a></td><?php } ?>
-                    <td><a href="clients.php?id=<?= $donnees['idclient'];?>&delete">Supprimer</a></td>
+                    <td><?= $donnees['dateheurecommande']; ?></td>
+                    <td><?= $donnees['montantcommande']; ?></td>
+                    <td><?= $donnees['etatcommande']; ?></td>
                 </tr>
                 <?php } ?>
             </tbody>
@@ -166,7 +145,6 @@ if(isset($_GET['id'])){
   </div>
 
 </main>
-
 
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
       <script>window.jQuery || document.write('<script src="/docs/4.4/assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="/docs/4.4/dist/js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script></body>
