@@ -1,61 +1,6 @@
 <?php
 include('db.php');
 
-$liste = pg_query($conn, "SELECT * FROM produit ORDER BY nomproduit");
-
-if (isset($_GET['quantite'])) {
-    $idproduit = intval($_GET['id']);
-    $quantite = intval($_GET['quantite']);
-    $check_exist = pg_query($conn, "SELECT * FROM panier WHERE idproduit='$idproduit' AND idclient='$id'");
-    $check_stock = pg_fetch_array(pg_query($conn, "SELECT stock FROM produit WHERE idproduit='$idproduit'"));
-    $stock = $check_stock[0];
-    if (pg_num_rows($check_exist) > 0) {
-        $check_current_quantite = pg_fetch_array(pg_query($conn, "SELECT quantite FROM panier WHERE idproduit='$idproduit' AND idclient='$id'"));
-        $current_quantite = $check_current_quantite[0];
-        if ($current_quantite + $quantite > $stock) {
-            header("Location:produits.php?id=" . intval($idproduit) . "&error");
-        } else {
-            pg_query($conn, "UPDATE panier SET quantite=(SELECT quantite FROM panier WHERE idproduit='$idproduit' AND idclient='$id')+$quantite WHERE idproduit='$idproduit' AND idclient='$id'");
-            header("Location:produits.php?id=" . intval($idproduit) . "&added");
-        }
-    } else {
-        if ($quantite > $stocl) {
-            header("Location:produits.php?id=" . intval($idproduit) . "&error");
-        } else {
-            pg_query($conn, "INSERT INTO panier(idproduit, idclient, quantite) VALUES ('$idproduit', '$id', '$quantite')");
-            header("Location:produits.php?id=" . intval($idproduit) . "&added");
-        }
-    }
-}
-
-if (isset($_GET['create'])){
-    $sql = "insert into commande(dateretrait, montantcommande, quai, preparateur, livreur, client)  values(to_date('27/04/2022', 'DD/MM/YYYY'), 229.96, 1, 1, 1, $id)";
-    pg_query($conn, $sql);
-    $sqlitems = "SELECT pr.nomproduit, pa.quantite, pr.prix, pr.idproduit FROM Produit pr, Panier pa WHERE pr.idproduit = pa.idproduit AND pa.idclient='$id'";
-    $items = pg_query($conn, $sqlitems);
-    $total = 0;
-    $nb = 0;
-    while ($row = pg_fetch_assoc($items)){
-        $idp = $row['idproduit'];
-        $qte = $row['quantite'];
-        pg_query($conn,"insert into estcommande(idproduit, idcommande, quantite)  values($idp, $id, $qte)");
-        pg_query($conn,"DELETE FROM panier WHERE idproduit ='$idp' AND idclient ='$id'");
-    }
-    header("Location:commandeval.php?id=1");
-
-    if(isset($_GET['delete'])){
-        pg_query($conn,"DELETE FROM panier WHERE idproduit ='$_GET[id]' AND idclient ='$id'");
-        header("Location:commande.php");
-        exit;
-    }
-}
-
-if (isset($_GET['added']) || isset($_GET['error'])) {
-    $nomproduit = pg_fetch_array(pg_query($conn, "SELECT nomproduit FROM produit WHERE idproduit = '$_GET[id]'"));
-
-
-}
-
 ?>
 
 <!doctype html>
@@ -172,12 +117,11 @@ if (isset($_GET['added']) || isset($_GET['error'])) {
                         <th scope="col">Prix</th>
                         <th scope="col">Total</th>
                         <th scope="col">Quantité</th>
-                        <th scope="col">Action</th>
                     </tr>
                     </thead>
                     <tbody>
                     <?php
-                    $sqlitems = "SELECT pr.nomproduit, pa.quantite, pr.prix, pr.idproduit FROM Produit pr, Panier pa WHERE pr.idproduit = pa.idproduit AND pa.idclient='$id'";
+                    $sqlitems = "SELECT pr.nomproduit, e.quantite, pr.prix, pr.idproduit FROM Produit pr, estcommande e WHERE pr.idproduit = e.idproduit AND e.idcommande='6'";
                     $items = pg_query($conn, $sqlitems);
                     $total = 0;
                     $nb = 0;
@@ -187,7 +131,6 @@ if (isset($_GET['added']) || isset($_GET['error'])) {
                             <td><?= $row['prix'] ?></td>
                             <td><?= $row['quantite']; ?></td>
                             <td><?= $row['quantite'] * $row['prix'] ?></td>
-                            <td><a href="commande.php?id=<?= $row['idproduit'];?>&delete">Supprimer</a></td>
                         </tr>
                         <?php $total += $row['quantite'] * $row['prix'];
                         $nb += $row['quantite']; endwhile; ?>
@@ -195,9 +138,6 @@ if (isset($_GET['added']) || isset($_GET['error'])) {
                 </table>
                 <h2><font size="3"> Total de la commande : <?= $total ?>€</font></h2>
                 <h2><font size="3"> Nombre de produits commandés : <?= $nb ?></font></h2>
-                <?php if(!isset($_GET['create'])):?>
-                <center><a class="btn btn-primary" type="submit" href="commande.php?create">Valider la commande</a></center>
-                <?php endif ?>
             </form>
         </div>
     </div>
