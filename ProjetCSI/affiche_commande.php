@@ -1,10 +1,18 @@
 <?php
 include('db.php');
-$liste = pg_query($conn, "SELECT * FROM produit ORDER BY nomproduit");
+if(isset($_GET['id'])){
+  $idcommande=$_GET['id'];
+  $idclient = pg_fetch_array(pg_query($conn, "SELECT client FROM commande where idcommande='$idcommande' "))[0]; 	
+  $nomclient = pg_fetch_array(pg_query($conn,"SELECT nomclient FROM client WHERE idclient='$idcommande'"))[0];
+  $montant = pg_fetch_array(pg_query($conn, "SELECT montantcommande FROM commande  where idcommande='$idcommande' "))[0];
+  $liste = pg_query($conn, "SELECT * FROM estcommande WHERE idcommande='$idcommande'");
+  $etat = pg_fetch_array(pg_query($conn, "SELECT etatcommande WHERE idcommande='$idcommande'"));
+}
 
-if(isset($_GET['quantite'])){
-  $idproduit = intval($_GET['id']);
-  $quantite = intval($_GET['quantite']);
+if(isset($_POST['ajouter'])){
+  header("Location:index.php");
+  exit;
+  /* $quantite = intval($_POST['quantite']);
   $check_exist = pg_query($conn, "SELECT * FROM panier WHERE idproduit='$idproduit' AND idclient='$id'");
   $check_stock = pg_fetch_array(pg_query($conn, "SELECT stock FROM produit WHERE idproduit='$idproduit'"));
   $stock = $check_stock[0];
@@ -27,20 +35,17 @@ if(isset($_GET['quantite'])){
       pg_query($conn, "INSERT INTO panier(idproduit, idclient, quantite) VALUES ('$idproduit', '$id', '$quantite')");
       header("Location:produits.php?id=".intval($idproduit)."&added");
     }
-  }
+  } */
 }
 
-if(isset($_GET['added'])|| isset($_GET['error']))
-{
-  $nomproduit = pg_fetch_array(pg_query($conn,"SELECT nomproduit FROM produit WHERE idproduit = '$_GET[id]'"));
-}
 
-/* if(isset($_GET['id'])){
-    $query_name = pg_query($conn,"SELECT nomproduit FROM produit WHERE idproduit = '$_GET[id]'");
-    $name = pg_fetch_array($query_name);
+/* if(isset($_GET['ajouter'])){
+    pg_query($conn, "INSERT INTO panier(idproduit, idclient, quantite) VALUES ('$_GET[id]', '$id', '$quantite')");
+    header("Location:produits.php?id=".$_GET['id']."&added");
 } */
-?>
 
+
+?>
 <!doctype html>
 <html lang="en">
   <head>
@@ -135,48 +140,67 @@ if(isset($_GET['added'])|| isset($_GET['error']))
   <!-- Main jumbotron for a primary marketing message or call to action -->
   <div class="jumbotron" style="background-color:#fff;">
     <div class="container">
-    <form method="post">
-        <br>
-        <h2>Liste des produits</h2>
-        <br>
-        <?php if(isset($_GET['added'])){?><h2 style="color:#90EE90"><font size="3">L'article <?=$nomproduit[0]?> a bien été ajouté au panier.</font></h2><?php } ?>
-        <?php if(isset($_GET['error'])){?><h2 style="color:#FF0000"><font size="3">Il n'y a pas assez de stock pour répondre à votre demande pour cet article : <?=$nomproduit[0]?></font></h2><?php } ?>
-        <table class="table table-striped">
+    <form>
+      <br>
+      <h2>Commande <?=$idcommande?></h2>
+      <br>
+
+      <div class="form-group row">
+    <label class="col-sm-2 col-form-label">Client : </label>
+    <div class="col-sm-10">
+      <input type="text" name="client" id="client" class="form-control-plaintext" value="<?=$nomclient;?>">
+    </div>
+
+    <label class="col-sm-2 col-form-label">ID : </label>
+    <div class="col-sm-10">
+      <input type="text" name="idclient" id="idclient" class="form-control-plaintext" value="<?=$idclient;?>">
+    </div>
+  </div>
+  <table class="table table-striped">
             <thead>
                 <tr>
                     <th scope="col>">ID</th>
                     <th scope="col">Nom</th>
-                    <th scope="col">En stock</th>
-                    <th scope="col">Prix</th>
-                    <?php if(!isset($statut)){?><th scope="col">Quantité</th><?php } ?>
-                    <?php if(!isset($statut) || (isset($statut) && ($statut=='Responsable'))){?><th scope="col">Action</th><?php }?>
-                    
+                    <th scope="col">Quantité</th>
                 </tr>
             </thead>
             <tbody>
                 <?php
                 while ($donnees = pg_fetch_array($liste)){
                 ?>
-                <tr><td><input class="form-control-plaintext" type="text" readonly name="idproduit" id="idproduit" value="<?=$donnees['idproduit'];?>"></td>
-                    <td><a href="affiche_produit.php?id=<?=$donnees['idproduit']?>"><?= $donnees['nomproduit']; ?></a></td>
-                    <td><?= $donnees['stock']; ?></td>
-                    <td><?= $donnees['prix']; ?></td>
-                    <?php if(!isset($statut)){ ?>
-                    <td>
-                      <input type="text" name="quantite<?=$donnees['idproduit']?>" id="quantite<?=$donnees['idproduit']?>" class="form-control">
-                    </td>
-                    <td><a href="" onclick="this.href='produits.php?id=<?=$donnees['idproduit']?>&quantite='+document.getElementById('quantite<?=$donnees['idproduit']?>').value">Ajouter au panier</a>
-                    </td>
-                    <?php } if(isset($statut)){if($statut!='Employé'){ ?><td><a href="produits_modif.php?id=<?=$donnees['idproduit'];?>">Modifier</a></td> <?php }}?>
+                <tr><td><?= $donnees['idproduit'];?></td>
+                    <td><?= pg_fetch_array(pg_query($conn,"SELECT nomproduit FROM produit WHERE idproduit='$donnees[idproduit]'"))[0];?></td>
+                    <td><?= $donnees['quantite']; ?></td>
                 </tr>
-                <?php } ?>
+                <?php }?>
             </tbody>
         </table>
-    </form>
+  
+        <div class="form-group row">
+    <label class="col-sm-2 col-form-label">Montant : </label>
+    <div class="col-sm-10">
+      <input type="text" name="montant" id="montant" class="form-control-plaintext" value="<?=$montant;?>">
     </div>
   </div>
 
+  <div class="col-sm-10">
+            <label class="col-sm-2 col-form-label">Etat : </label>
+            <select name="tri" id="tri" class="form-control" onchange="this.form.submit()">
+                <option value="Tous" <?php if($tri == "Tous"){echo "selected";}?>>Tous les clients</option>
+                <option value="NonBloqués" <?php if($tri == "NonBloqués"){echo "selected";}?>>Clients non-bloqués</option>
+                <option value="Bloqués" <?php if($tri == "Bloqués"){echo "selected";}?>>Clients bloqués</option>
+            </select>
+        </div>
+</form>
+  </div>
+  </div>
+
 </main>
+
+
+
+
+
 
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
       <script>window.jQuery || document.write('<script src="/docs/4.4/assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="/docs/4.4/dist/js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script></body>

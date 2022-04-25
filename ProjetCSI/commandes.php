@@ -1,12 +1,6 @@
 <?php
 include('db.php');
-if (isset($_POST['fermeture'])){
-  $liste = pg_query($conn, "SELECT idclient FROM client INNER JOIN commande ON commande.client = client.idclient WHERE etatcommande='Prête' AND dateretrait=CURRENT_DATE");
-  while($donnees= pg_fetch_array($liste)){
-    pg_query($conn,"SELECT check_abandons('$donnees[idclient]')");
-  }
-  pg_query($conn,"SELECT bloquer()");
-}
+$liste = pg_query($conn, "SELECT * FROM commande ORDER BY idcommande");
 ?>
 
 <!doctype html>
@@ -100,20 +94,44 @@ if (isset($_POST['fermeture'])){
 </nav>
 
 <main role="main">
-  <form method="post">
   <!-- Main jumbotron for a primary marketing message or call to action -->
-  <div class="jumbotron">
+  <div class="jumbotron" style="background-color:#fff;">
     <div class="container">
-      <h1 class="display-3"><font size=20>Bonjour <?php if(isset($_SESSION['email'])){echo $prenom." ".$nom; } ?></font></h1>
+    <form method="post">
+        <br>
+        <h2>Liste des commandes</h2>
+        <br>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col>">ID</th>
+                    <th scope="col">Client</th>
+                    <th scope="col">Date de commande</th>
+                    <th scope="col">Date de retrait</th>
+                    <th scope="col">Montant</th>
+                    <th scope="col">Etat</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                while ($donnees = pg_fetch_array($liste)){
+                ?>
+                <tr><td><?=$donnees['idcommande'];?></td>
+                    <td><?= $donnees['client']; ?></a></td>
+                    <td><?= $donnees['dateheurecommande']; ?></td>
+                    <td><?= $donnees['dateretrait']; ?></td>
+                    <td><?= $donnees['montantcommande']; ?></td>
+                    <td><?= $donnees['etatcommande']; ?></td>
+                    <td><a href="affiche_commande.php?id=<?=$donnees['idcommande']?>">Consulter</a></td>
+                </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </form>
     </div>
   </div>
 
-  <?php if (isset($statut)) { if($statut=='Responsable'){ ?>
-  <div class="container">
-    <center><button name="fermeture" type="submit" class="info">Fermeture</button></center>
-  </div>
-  <?php }} ?>
-  </form>
 </main>
 
 
