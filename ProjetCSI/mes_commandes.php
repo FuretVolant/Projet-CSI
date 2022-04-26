@@ -65,22 +65,22 @@ switch($tri){
       </li>
       
       <li class="nav-item active">
-        <a class="nav-link" href="produits">Tous les produits</a>
+        <a class="nav-link" href="produits.php">Tous les produits</a>
       </li>
 
       <?php if(isset ($statut)){?>
       <li class="nav-item active">
-        <a class="nav-link" href="commandes">Commandes</a> 
+        <a class="nav-link" href="commandes.php">Commandes</a>
       </li>
       <?php }?>
       
 
       <?php if(isset ($statut)){ if($statut=='Responsable'){?>
       <li class="nav-item active">
-        <a class="nav-link" href="creation_utilisateur">Créer un utilisateur</a> 
+        <a class="nav-link" href="creation_utilisateur.php">Créer un utilisateur</a> 
       </li>
       <li class="nav-item active">
-        <a class="nav-link" href="clients">Clients</a> 
+        <a class="nav-link" href="clients.php">Clients</a> 
       </li>
       <?php }}?>
 

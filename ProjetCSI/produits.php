@@ -6,8 +6,7 @@ if(isset($_GET['quantite'])){
   $idproduit = intval($_GET['id']);
   $quantite = intval($_GET['quantite']);
   $check_exist = pg_query($conn, "SELECT * FROM panier WHERE idproduit='$idproduit' AND idclient='$id'");
-  $check_stock = pg_fetch_array(pg_query($conn, "SELECT stock FROM produit WHERE idproduit='$idproduit'"));
-  $stock = $check_stock[0];
+  $stock = pg_fetch_array(pg_query($conn, "SELECT stock FROM produit WHERE idproduit='$idproduit'"))[0];
   if(pg_num_rows($check_exist) > 0){
     $check_current_quantite = pg_fetch_array(pg_query($conn,"SELECT quantite FROM panier WHERE idproduit='$idproduit' AND idclient='$id'"));
     $current_quantite = $check_current_quantite[0];
@@ -93,22 +92,22 @@ if(isset($_GET['added'])|| isset($_GET['error']))
       </li>
       
       <li class="nav-item active">
-        <a class="nav-link" href="produits">Tous les produits</a>
+        <a class="nav-link" href="produits.php">Tous les produits</a>
       </li>
 
       <?php if(isset ($statut)){?>
       <li class="nav-item active">
-        <a class="nav-link" href="commandes">Commandes</a> 
+        <a class="nav-link" href="commandes.php">Commandes</a>
       </li>
       <?php }?>
       
 
       <?php if(isset ($statut)){ if($statut=='Responsable'){?>
       <li class="nav-item active">
-        <a class="nav-link" href="creation_utilisateur">Créer un utilisateur</a> 
+        <a class="nav-link" href="creation_utilisateur.php">Créer un utilisateur</a> 
       </li>
       <li class="nav-item active">
-        <a class="nav-link" href="clients">Clients</a> 
+        <a class="nav-link" href="clients.php">Clients</a> 
       </li>
       <?php }}?>
 
@@ -144,7 +143,6 @@ if(isset($_GET['added'])|| isset($_GET['error']))
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th scope="col>">ID</th>
                     <th scope="col">Nom</th>
                     <th scope="col">En stock</th>
                     <th scope="col">Prix</th>
@@ -157,7 +155,7 @@ if(isset($_GET['added'])|| isset($_GET['error']))
                 <?php
                 while ($donnees = pg_fetch_array($liste)){
                 ?>
-                <tr><td><input class="form-control-plaintext" type="text" readonly name="idproduit" id="idproduit" value="<?=$donnees['idproduit'];?>"></td>
+                <tr>
                     <td><a href="affiche_produit.php?id=<?=$donnees['idproduit']?>"><?= $donnees['nomproduit']; ?></a></td>
                     <td><?= $donnees['stock']; ?></td>
                     <td><?= $donnees['prix']; ?></td>

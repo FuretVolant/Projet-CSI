@@ -5,17 +5,20 @@ $total = 0;
 
 
 if (isset($_GET['create'])){
-    $sql = "insert into commande(dateheurecommande, dateretrait, montantcommande,client)  values(NOW(), NOW() + INTERVAL '1 DAY', '$_GET[total]', $id)";
+    $sql = "INSERT INTO commande(dateheurecommande, dateretrait, montantcommande,client) values(NOW(), NOW() + INTERVAL '1 DAY', '$_GET[total]', $id)";
     pg_query($conn, $sql);
-    $sqlitems = "SELECT pr.nomproduit, pa.quantite, pr.prix, pr.idproduit FROM Produit pr, Panier pa WHERE pr.idproduit = pa.idproduit AND pa.idclient='$id'";
+    $sqlitems = "SELECT * FROM Panier WHERE idclient='$id'";
     $items = pg_query($conn, $sqlitems);
+    var_dump($items);
     $total = 0;
     $nb = 0;
+    $idcommande = 2;
     while ($row = pg_fetch_assoc($items)){
-        $idp = $row['idproduit'];
+        $idproduit = $row['idproduit'];
         $qte = $row['quantite'];
-        pg_query($conn,"insert into estcommande(idproduit, idcommande, quantite)  values($idp, $id, $qte)");
-        pg_query($conn,"DELETE FROM panier WHERE idproduit ='$idp' AND idclient ='$id'");
+        $idcommande = (pg_fetch_array(pg_query($conn, "SELECT MAX(idcommande) FROM commande")))[0];
+        pg_query($conn,"INSERT INTO estcommande(idproduit, idcommande, quantite) values($idproduit, $idcommande, $qte)");
+        pg_query($conn,"DELETE FROM panier WHERE idproduit ='$idproduit' AND idclient ='$id'");
     }
     header("Location:mes_commandes.php?id=".intval($id));
 
@@ -78,59 +81,55 @@ if (isset($_GET['added']) || isset($_GET['error'])) {
 
 <body class="text-center">
 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <a class="navbar-brand"><b>ToyS'R'Sus</b></a>
-    <li class="navbar-toggler" data-toggle="collapse" data-target="#navbarsExampleDefault"
-        aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+  <a class="navbar-brand"><b>ToyS'R'Sus</b></a>
+  <li class="navbar-toggler" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
     </li>
+  
 
+  <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a href="index.php" class="nav-link">Accueil<span class="sr-only">(current)</span></a>
+      </li>
+      
+      <li class="nav-item active">
+        <a class="nav-link" href="produits.php">Tous les produits</a>
+      </li>
 
-    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a href="index.php" class="nav-link">Accueil<span class="sr-only">(current)</span></a>
-            </li>
+      <?php if(isset ($statut)){?>
+      <li class="nav-item active">
+        <a class="nav-link" href="commandes.php">Commandes</a>
+      </li>
+      <?php }?>
+      
 
-            <li class="nav-item active">
-                <a class="nav-link" href="produits.php">Tous les produits</a>
-            </li>
+      <?php if(isset ($statut)){ if($statut=='Responsable'){?>
+      <li class="nav-item active">
+        <a class="nav-link" href="creation_utilisateur.php">Créer un utilisateur</a> 
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link" href="clients.php">Clients</a> 
+      </li>
+      <?php }}?>
 
-            <?php if (isset ($statut)) { ?>
-                <li class="nav-item active">
-                    <a class="nav-link" href="commandes.php">Commandes</a>
-                </li>
-            <?php } ?>
+      
+    </ul>
 
-
-            <?php if (isset ($statut)) {
-                if ($statut == 'Responsable') { ?>
-                    <li class="nav-item active">
-                        <a class="nav-link" href="creation_utilisateur">Créer un utilisateur</a>
-                    </li>
-                    <li class="nav-item active">
-                        <a class="nav-link" href="clients">Clients</a>
-                    </li>
-                <?php }
-            } ?>
-        </ul>
-
-        <form class="form-inline my-2 my-lg-0">
-            <?php if (isset($_SESSION['email'])) { ?>
-                <?php if (!isset($statut)) { ?><a href="panier.php?id=<?= $id ?>"
-                                                  class="btn btn-outline-success my-2 my-sm-0">Panier</a><?php } ?>
-                &nbsp;
-                <a href="mon_compte.php?id=<?= $id ?><?php if (isset($statut)) {
-                    echo '&?statut=' . $statut;
-                } ?>" class="btn btn-outline-success my-2 my-sm-0">Mon compte</a>
-                &nbsp;
-                <a href="logout.php" class="btn btn-outline-success my-2 my-sm-0">Déconnexion</a>
-            <?php } else { ?>
-                <a href="connexion.php" class="btn btn-outline-success my-2 my-sm-0">Connexion</a>
-                &nbsp;
-                <a href="inscription.php" class="btn btn-outline-success my-2 my-sm-0">Inscription</a>
-            <?php } ?>
-        </form>
-    </div>
+    <form class="form-inline my-2 my-lg-0">
+      <?php if(isset($_SESSION['email'])){?>
+      <?php if(!isset($statut)){?><a href="panier.php?id=<?=$id?>" class="btn btn-outline-success my-2 my-sm-0">Panier</a><?php }?>
+      &nbsp;
+      <a href="mon_compte.php?id=<?= $id?><?php if(isset($statut)){echo '&?statut='.$statut;}?>" class="btn btn-outline-success my-2 my-sm-0">Mon compte</a>
+      &nbsp;
+      <a href="logout.php" class="btn btn-outline-success my-2 my-sm-0">Déconnexion</a>
+      <?php } else { ?>
+      <a href="connexion.php" class="btn btn-outline-success my-2 my-sm-0">Connexion</a>
+      &nbsp;
+      <a href="inscription.php" class="btn btn-outline-success my-2 my-sm-0">Inscription</a>
+      <?php } ?>
+    </form>
+  </div>
 </nav>
 
 <main role="main">

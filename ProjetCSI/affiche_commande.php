@@ -1,7 +1,7 @@
 <?php
 include('db.php');
 $etat=null;
-
+$quai=null;
 
 if(isset($_GET['id'])){
   $idcommande=$_GET['id'];
@@ -10,11 +10,26 @@ if(isset($_GET['id'])){
   $montant = pg_fetch_array(pg_query($conn, "SELECT montantcommande FROM commande  where idcommande='$idcommande' "))[0];
   $liste = pg_query($conn, "SELECT * FROM estcommande WHERE idcommande='$idcommande'");
   $etat = pg_fetch_array(pg_query($conn, "SELECT etatcommande FROM commande WHERE idcommande='$idcommande'"))[0];
+  $preparateur = pg_fetch_array(pg_query($conn, "SELECT preparateur FROM commande WHERE idcommande='$idcommande'"))[0];
 }
 
 if(isset($_POST['etat'])){
     $etat = $_POST['etat'];
     pg_query($conn, "UPDATE commande SET etatcommande='$etat' WHERE idcommande ='$idcommande'");
+    if($etat=='En préparation'){
+        pg_query($conn,"UPDATE commande SET preparateur='$id' WHERE idcommande='$idcommande'");
+    }
+
+    if($etat=='Livrée'){
+        pg_query($conn, "UPDATE commande SET livreur='$id' WHERE idcommande='$idcommande'");
+        pg_query($conn, "UPDATE client SET points=$montant/10 WHERE idclient='$id'");
+        pg_query($conn, "UPDATE commande SET horaireretraitrelle=NOW() WHERE idcommande='$idcommande'");
+    }
+}
+
+if(isset($_POST['quai'])){
+    $quai=$_POST['quai'];
+    pg_query($conn,"UPDATE commande SET quai='$quai' WHERE idcommande='$idcommande'");
 }
 
 if(isset($_POST['Payer'])){
@@ -79,24 +94,25 @@ if(isset($_POST['Annuler'])){
     <ul class="navbar-nav mr-auto">
       <li class="nav-item active">
         <a href="index.php" class="nav-link">Accueil<span class="sr-only">(current)</span></a>
-      </li>  
+      </li>
+      
       <li class="nav-item active">
-        <a class="nav-link" href="produits">Tous les produits</a>
+        <a class="nav-link" href="produits.php">Tous les produits</a>
       </li>
 
       <?php if(isset ($statut)){?>
       <li class="nav-item active">
-        <a class="nav-link" href="commandes">Commandes</a> 
+        <a class="nav-link" href="commandes.php">Commandes</a>
       </li>
       <?php }?>
       
 
       <?php if(isset ($statut)){ if($statut=='Responsable'){?>
       <li class="nav-item active">
-        <a class="nav-link" href="creation_utilisateur">Créer un utilisateur</a> 
+        <a class="nav-link" href="creation_utilisateur.php">Créer un utilisateur</a> 
       </li>
       <li class="nav-item active">
-        <a class="nav-link" href="clients">Clients</a> 
+        <a class="nav-link" href="clients.php">Clients</a> 
       </li>
       <?php }}?>
 
@@ -166,7 +182,7 @@ if(isset($_POST['Annuler'])){
     </div>
   </div>
 
-  <?php if(isset($statut)){ ?>
+  <?php if(isset($statut)){?>
   <div class="col-sm-10">
             <label class="col-sm-2 col-form-label">Etat : </label>
             <select name="etat" id="etat" class="form-control" onchange="this.form.submit()">
@@ -184,7 +200,7 @@ if(isset($_POST['Annuler'])){
 
                 case 'Prête' : ?>
                     <option value="Prête" selected>Prête</option>
-                    <option value="Livrée">Livrée</option>
+                    <?php if ($preparateur != $id){ ?><option value="Livrée">Livrée</option> <?php } ?>
                 <?php break;
 
                 default : ?>
