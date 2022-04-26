@@ -1,6 +1,22 @@
 <?php
 include('db.php');
 $liste = pg_query($conn, "SELECT * FROM commande ORDER BY idcommande");
+$tri=null;
+if(isset($_POST['tri'])){
+    $tri = $_POST['tri'];
+}
+
+switch($tri){
+    case 'Toutes' : $liste = pg_query($conn, "SELECT idcommande, client, dateheurecommande, dateretrait, montantcommande, etatcommande FROM commande"); break;
+    case 'Soumise' : $liste = pg_query($conn, "SELECT idcommande, client, dateheurecommande, dateretrait, montantcommande, etatcommande FROM commande WHERE etatcommande = 'Soumise'"); break;
+    case 'Payée' : $liste = pg_query($conn, "SELECT idcommande, client, dateheurecommande, dateretrait, montantcommande, etatcommande FROM commande WHERE etatcommande = 'Payée'"); break;
+    case 'En préparation' : $liste = pg_query($conn, "SELECT idcommande, client, dateheurecommande, dateretrait, montantcommande, etatcommande FROM commande WHERE etatcommande = 'En préparation'"); break;
+    case 'Prête' : $liste = pg_query($conn, "SELECT idcommande, client, dateheurecommande, dateretrait, montantcommande, etatcommande FROM commande WHERE etatcommande = 'Prête'"); break;
+    case 'Livrée' : $liste = pg_query($conn, "SELECT idcommande, client, dateheurecommande, dateretrait, montantcommande, etatcommande FROM commande WHERE etatcommande = 'Livrée'"); break;
+    case 'Abandonnée' : $liste = pg_query($conn, "SELECT idcommande, client, dateheurecommande, dateretrait, montantcommande, etatcommande FROM commande WHERE etatcommande = 'Abandonnée'"); break;
+    case 'Annulée' : $liste = pg_query($conn, "SELECT idcommande, client, dateheurecommande, dateretrait, montantcommande, etatcommande FROM commande WHERE etatcommande = 'Annulée'"); break;
+    default : $liste = pg_query($conn, "SELECT idcommande, client, dateheurecommande, dateretrait, montantcommande, etatcommande FROM commande"); break;
+}
 ?>
 
 <!doctype html>
@@ -100,6 +116,20 @@ $liste = pg_query($conn, "SELECT * FROM commande ORDER BY idcommande");
     <form method="post">
         <br>
         <h2>Liste des commandes</h2>
+        <br>
+
+        <div class="col-sm-10">
+            <select name="tri" id="tri" class="form-control" onchange="this.form.submit()">
+                <option value="Toutes" <?php if($tri == "Toutes"){echo "selected";}?>>Toutes les commandes</option>
+                <option value="Soumise" <?php if($tri == "Soumise"){echo "selected";}?>>Commandes soumises</option>
+                <option value="Payée" <?php if($tri == "Payée"){echo "selected";}?>>Commandes payées</option>
+                <option value="En préparation" <?php if($tri == "En préparation"){echo "selected";}?>>Commandes en préparation</option>
+                <option value="Prête" <?php if($tri == "Prête"){echo "selected";}?>>Commandes prêtes</option>
+                <option value="Livrée" <?php if($tri == "Livrée"){echo "selected";}?>>Commandes livrées</option>
+                <option value="Abandonnée" <?php if($tri == "Abandonnée"){echo "selected";}?>>Commandes abandonnées</option>
+                <option value="Annulée" <?php if($tri == "Annulée"){echo "selected";}?>>Commandes annulées</option>
+            </select>
+        </div>
         <br>
         <table class="table table-striped">
             <thead>

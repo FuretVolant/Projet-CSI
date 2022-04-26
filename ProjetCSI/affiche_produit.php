@@ -162,6 +162,8 @@ if(isset($_POST['ajouter'])){
       <input type="text" name="stock" readonly class="form-control-plaintext" id="stock" value="<?=$stock ?>">
     </div>
   </div>
+  
+  <?php if(!isset($statut) && isset($_SESSION['email'])){?>
   <div class="form-group row">
     <label class="col-sm-2 col-form-label">Quantité à ajouter au panier </label>
     <div class="col-sm-10">
@@ -169,6 +171,7 @@ if(isset($_POST['ajouter'])){
     </div>
   </div>
   <center><button name="ajouter" type="submit" class="info">Ajouter au panier</button></center>
+  <?php } ?>
 </form>
   </div>
   </div>

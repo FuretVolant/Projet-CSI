@@ -7,6 +7,10 @@ if (isset($_POST['fermeture'])){
   }
   pg_query($conn,"SELECT bloquer()");
 }
+
+if (isset($_POST['reset'])){
+  pg_query($conn, "SELECT reset_points()");
+}
 ?>
 
 <!doctype html>
@@ -111,6 +115,7 @@ if (isset($_POST['fermeture'])){
   <?php if (isset($statut)) { if($statut=='Responsable'){ ?>
   <div class="container">
     <center><button name="fermeture" type="submit" class="info">Fermeture</button></center>
+    <center><button name="reset" type="submit" class="info">Reset points</button></center>
   </div>
   <?php }} ?>
   </form>

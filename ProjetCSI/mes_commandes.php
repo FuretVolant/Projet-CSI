@@ -6,10 +6,10 @@ if(isset($_POST['tri'])){
 }
 
 switch($tri){
-    case 'Toutes' : $liste = pg_query($conn, "SELECT dateheurecommande, montantcommande, etatcommande FROM Commande WHERE client='$id'"); break;
-    case 'EnCours' : $liste = pg_query($conn, "SELECT dateheurecommande, montantcommande, etatcommande FROM Commande WHERE client='$id' AND etatcommande IN ('Soumise', 'Payée', 'En préparation', 'Prête')"); break;
-    case 'Anciennes' : $liste = pg_query($conn, "SELECT dateheurecommande, montantcommande, etatcommande FROM Commande WHERE client='$id' AND etatcommande IN ('Livrée', 'Abandonnée', 'Annulée')"); break;
-    default : $liste = pg_query($conn, "SELECT dateheurecommande, montantcommande, etatcommande FROM Commande WHERE client='$id'"); break;
+    case 'Toutes' : $liste = pg_query($conn, "SELECT idcommande, dateheurecommande, montantcommande, etatcommande FROM Commande WHERE client='$id'"); break;
+    case 'EnCours' : $liste = pg_query($conn, "SELECT idcommande, dateheurecommande, montantcommande, etatcommande FROM Commande WHERE client='$id' AND etatcommande IN ('Soumise', 'Payée', 'En préparation', 'Prête')"); break;
+    case 'Anciennes' : $liste = pg_query($conn, "SELECT idcommande, dateheurecommande, montantcommande, etatcommande FROM Commande WHERE client='$id' AND etatcommande IN ('Livrée', 'Abandonnée', 'Annulée')"); break;
+    default : $liste = pg_query($conn, "SELECT idcommande, dateheurecommande, montantcommande, etatcommande FROM Commande WHERE client='$id'"); break;
 }
 ?>
 
@@ -126,6 +126,7 @@ switch($tri){
                     <th scope="col">Date</th>
                     <th scope="col">Montant</th>
                     <th scope="col">Etat</th>
+                    <th scope="col">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -136,6 +137,7 @@ switch($tri){
                     <td><?= $donnees['dateheurecommande']; ?></td>
                     <td><?= $donnees['montantcommande']; ?></td>
                     <td><?= $donnees['etatcommande']; ?></td>
+                    <td><a href="affiche_commande.php?id=<?=$donnees['idcommande'];?>">Consulter</a>
                 </tr>
                 <?php } ?>
             </tbody>

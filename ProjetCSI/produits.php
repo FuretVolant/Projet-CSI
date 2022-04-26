@@ -148,8 +148,8 @@ if(isset($_GET['added'])|| isset($_GET['error']))
                     <th scope="col">Nom</th>
                     <th scope="col">En stock</th>
                     <th scope="col">Prix</th>
-                    <?php if(!isset($statut)){?><th scope="col">Quantité</th><?php } ?>
-                    <?php if(!isset($statut) || (isset($statut) && ($statut=='Responsable'))){?><th scope="col">Action</th><?php }?>
+                    <?php if(!isset($statut) && isset($_SESSION['email'])){?><th scope="col">Quantité</th><?php } ?>
+                    <?php if(!isset($statut) && isset($_SESSION['email']) || (isset($statut) && ($statut=='Responsable'))){?><th scope="col">Action</th><?php }?>
                     
                 </tr>
             </thead>
@@ -161,7 +161,7 @@ if(isset($_GET['added'])|| isset($_GET['error']))
                     <td><a href="affiche_produit.php?id=<?=$donnees['idproduit']?>"><?= $donnees['nomproduit']; ?></a></td>
                     <td><?= $donnees['stock']; ?></td>
                     <td><?= $donnees['prix']; ?></td>
-                    <?php if(!isset($statut)){ ?>
+                    <?php if(!isset($statut) && isset($_SESSION['email'])){?>
                     <td>
                       <input type="text" name="quantite<?=$donnees['idproduit']?>" id="quantite<?=$donnees['idproduit']?>" class="form-control">
                     </td>

@@ -1,48 +1,32 @@
 <?php
 include('db.php');
+$etat=null;
+
+
 if(isset($_GET['id'])){
   $idcommande=$_GET['id'];
-  $idclient = pg_fetch_array(pg_query($conn, "SELECT client FROM commande where idcommande='$idcommande' "))[0]; 	
-  $nomclient = pg_fetch_array(pg_query($conn,"SELECT nomclient FROM client WHERE idclient='$idcommande'"))[0];
+  $idclient = pg_fetch_array(pg_query($conn, "SELECT client FROM commande where idcommande='$idcommande'"))[0]; 	
+  $nomclient = pg_fetch_array(pg_query($conn,"SELECT nomclient FROM client WHERE idclient='$idclient'"))[0];
   $montant = pg_fetch_array(pg_query($conn, "SELECT montantcommande FROM commande  where idcommande='$idcommande' "))[0];
   $liste = pg_query($conn, "SELECT * FROM estcommande WHERE idcommande='$idcommande'");
-  $etat = pg_fetch_array(pg_query($conn, "SELECT etatcommande WHERE idcommande='$idcommande'"));
+  $etat = pg_fetch_array(pg_query($conn, "SELECT etatcommande FROM commande WHERE idcommande='$idcommande'"))[0];
 }
 
-if(isset($_POST['ajouter'])){
-  header("Location:index.php");
-  exit;
-  /* $quantite = intval($_POST['quantite']);
-  $check_exist = pg_query($conn, "SELECT * FROM panier WHERE idproduit='$idproduit' AND idclient='$id'");
-  $check_stock = pg_fetch_array(pg_query($conn, "SELECT stock FROM produit WHERE idproduit='$idproduit'"));
-  $stock = $check_stock[0];
-  if(pg_num_rows($check_exist) > 0){
-    $check_current_quantite = pg_fetch_array(pg_query($conn,"SELECT quantite FROM panier WHERE idproduit='$idproduit' AND idclient='$id'"));
-    $current_quantite = $check_current_quantite[0];
-    if($current_quantite+$quantite > $stock){
-      header("Location:produits.php?id=".intval($idproduit)."&error");
-    }
-    else{
-      pg_query($conn, "UPDATE panier SET quantite=(SELECT quantite FROM panier WHERE idproduit='$idproduit' AND idclient='$id')+$quantite WHERE idproduit='$idproduit' AND idclient='$id'");
-      header("Location:produits.php?id=".intval($idproduit)."&added");
-    }
-  }
-  else{
-    if($quantite > $stock){
-      header("Location:produits.php?id=".intval($idproduit)."&error");
-    }
-    else{
-      pg_query($conn, "INSERT INTO panier(idproduit, idclient, quantite) VALUES ('$idproduit', '$id', '$quantite')");
-      header("Location:produits.php?id=".intval($idproduit)."&added");
-    }
-  } */
+if(isset($_POST['etat'])){
+    $etat = $_POST['etat'];
+    pg_query($conn, "UPDATE commande SET etatcommande='$etat' WHERE idcommande ='$idcommande'");
+}
+
+if(isset($_POST['Payer'])){
+    pg_query($conn, "UPDATE commande SET etatcommande='Payée' WHERE idcommande='$idcommande'");
+}
+
+if(isset($_POST['Annuler'])){
+    pg_query($conn, "UPDATE commande SET etatcommande='Annulée' WHERE idcommande='$idcommande'");
 }
 
 
-/* if(isset($_GET['ajouter'])){
-    pg_query($conn, "INSERT INTO panier(idproduit, idclient, quantite) VALUES ('$_GET[id]', '$id', '$quantite')");
-    header("Location:produits.php?id=".$_GET['id']."&added");
-} */
+
 
 
 ?>
@@ -95,8 +79,7 @@ if(isset($_POST['ajouter'])){
     <ul class="navbar-nav mr-auto">
       <li class="nav-item active">
         <a href="index.php" class="nav-link">Accueil<span class="sr-only">(current)</span></a>
-      </li>
-      
+      </li>  
       <li class="nav-item active">
         <a class="nav-link" href="produits">Tous les produits</a>
       </li>
@@ -140,7 +123,7 @@ if(isset($_POST['ajouter'])){
   <!-- Main jumbotron for a primary marketing message or call to action -->
   <div class="jumbotron" style="background-color:#fff;">
     <div class="container">
-    <form>
+    <form method='POST'>
       <br>
       <h2>Commande <?=$idcommande?></h2>
       <br>
@@ -183,14 +166,44 @@ if(isset($_POST['ajouter'])){
     </div>
   </div>
 
+  <?php if(isset($statut)){ ?>
   <div class="col-sm-10">
             <label class="col-sm-2 col-form-label">Etat : </label>
-            <select name="tri" id="tri" class="form-control" onchange="this.form.submit()">
-                <option value="Tous" <?php if($tri == "Tous"){echo "selected";}?>>Tous les clients</option>
-                <option value="NonBloqués" <?php if($tri == "NonBloqués"){echo "selected";}?>>Clients non-bloqués</option>
-                <option value="Bloqués" <?php if($tri == "Bloqués"){echo "selected";}?>>Clients bloqués</option>
+            <select name="etat" id="etat" class="form-control" onchange="this.form.submit()">
+            <?php switch($etat) {
+                case 'Payée' : ?>
+                    <option value="Payée" selected>Payée</option>
+                    <option value="En préparation">En préparation</option>
+                <?php  break;
+
+
+                case 'En préparation' : ?>
+                    <option value="En préparation" selected>En préparation</option>
+                    <option value="Prête">Prête</option>
+                <?php  break;
+
+                case 'Prête' : ?>
+                    <option value="Prête" selected>Prête</option>
+                    <option value="Livrée">Livrée</option>
+                <?php break;
+
+                default : ?>
+                    <option value="<?=$etat;?>"><?=$etat?></option>
+                <?php break;
+            }?>
             </select>
         </div>
+        <?php } 
+        else{ ?>
+            <label class="col-sm-2 col-form-label">Etat : </label>
+            <div class="col-sm-10">
+             <input readonly type="text" name="etatclient" class="form-control" id="etatclient" value=<?=$etat?>>
+            </div>
+            <?php if($etat=='Soumise'){?>
+            <center><button name="Payer" type="submit" class="info">Payer</button></center>
+            <center><button name="Annuler" type="submit" class="info">Annuler</button></center>
+            <?php } ?>
+        <?php } ?>
 </form>
   </div>
   </div>

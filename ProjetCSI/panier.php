@@ -132,9 +132,12 @@ if(isset($_GET['delete'])){
                 <?php } ?>
             </tbody>
         </table>
+        <?php if ($total > 0){?>
         <center><a class="btn btn-primary" href="commande.php" role="button">Valider le panier</a></center>
         <h2><font size="3"> Total de la commande : <?= $total?>€</font></h2>
         <h2><font size="3"> Nombre de produits commandés : <?=$nbproduits?></font></h2>
+        <?php } else { ?>
+          <h2><font size="3"> Votre panier est vide</font></h2><?php } ?>
     </div>
   </div>
 
