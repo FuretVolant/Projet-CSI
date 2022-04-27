@@ -5,6 +5,9 @@ $liste = pg_query($conn, "SELECT * FROM produit ORDER BY nomproduit");
 if(isset($_GET['quantite'])){
   $idproduit = intval($_GET['id']);
   $quantite = intval($_GET['quantite']);
+  if($quantite <= 0 || $quantite == null){
+    header("Location:produits.php?id=".intval($idproduit)."&empty");
+  }
   $check_exist = pg_query($conn, "SELECT * FROM panier WHERE idproduit='$idproduit' AND idclient='$id'");
   $stock = pg_fetch_array(pg_query($conn, "SELECT stock FROM produit WHERE idproduit='$idproduit'"))[0];
   if(pg_num_rows($check_exist) > 0){
@@ -140,6 +143,7 @@ if(isset($_GET['added'])|| isset($_GET['error']))
         <br>
         <?php if(isset($_GET['added'])){?><h2 style="color:#90EE90"><font size="3">L'article <?=$nomproduit[0]?> a bien été ajouté au panier.</font></h2><?php } ?>
         <?php if(isset($_GET['error'])){?><h2 style="color:#FF0000"><font size="3">Il n'y a pas assez de stock pour répondre à votre demande pour cet article : <?=$nomproduit[0]?></font></h2><?php } ?>
+        <?php if(isset($_GET['empty'])){?><h2 style="color:#FF0000"><font size="3">Veuillez entrer une quantité positive à ajouter au panier</font></h2><?php } ?>
         <table class="table table-striped">
             <thead>
                 <tr>

@@ -20,6 +20,12 @@ if(isset($_POST['etat'])){
         pg_query($conn,"UPDATE commande SET preparateur='$id' WHERE idcommande='$idcommande'");
     }
 
+    if($etat=='Prête'){
+        while($donnees = pg_fetch_array($liste)){
+            pg_query($conn, "UPDATE produit SET stock=(SELECT stock FROM produit WHERE idproduit='$donnees[idproduit]')-'$donnees[quantite]' WHERE idproduit = '$donnees[idproduit]'");
+        }
+    }
+
     if($etat=='Livrée'){
         pg_query($conn, "UPDATE commande SET livreur='$id' WHERE idcommande='$idcommande'");
         pg_query($conn, "UPDATE client SET points=$montant/10 WHERE idclient='$id'");

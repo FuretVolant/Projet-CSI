@@ -8,32 +8,35 @@ if(isset($_GET['id'])){
 }
 
 if(isset($_POST['ajouter'])){
-  header("Location:index.php");
-  exit;
-  /* $quantite = intval($_POST['quantite']);
-  $check_exist = pg_query($conn, "SELECT * FROM panier WHERE idproduit='$idproduit' AND idclient='$id'");
-  $check_stock = pg_fetch_array(pg_query($conn, "SELECT stock FROM produit WHERE idproduit='$idproduit'"));
-  $stock = $check_stock[0];
-  if(pg_num_rows($check_exist) > 0){
-    $check_current_quantite = pg_fetch_array(pg_query($conn,"SELECT quantite FROM panier WHERE idproduit='$idproduit' AND idclient='$id'"));
-    $current_quantite = $check_current_quantite[0];
-    if($current_quantite+$quantite > $stock){
-      header("Location:produits.php?id=".intval($idproduit)."&error");
-    }
-    else{
-      pg_query($conn, "UPDATE panier SET quantite=(SELECT quantite FROM panier WHERE idproduit='$idproduit' AND idclient='$id')+$quantite WHERE idproduit='$idproduit' AND idclient='$id'");
-      header("Location:produits.php?id=".intval($idproduit)."&added");
-    }
+  $quantite = intval($_POST['quantite']);
+  if($quantite <= 0){
+    header("Location:produits.php?id=".intval($idproduit)."&empty");
   }
-  else{
-    if($quantite > $stock){
-      header("Location:produits.php?id=".intval($idproduit)."&error");
+  else {
+    $check_exist = pg_query($conn, "SELECT * FROM panier WHERE idproduit='$idproduit' AND idclient='$id'");
+    $check_stock = pg_fetch_array(pg_query($conn, "SELECT stock FROM produit WHERE idproduit='$idproduit'"));
+    $stock = $check_stock[0];
+    if(pg_num_rows($check_exist) > 0){
+      $check_current_quantite = pg_fetch_array(pg_query($conn,"SELECT quantite FROM panier WHERE idproduit='$idproduit' AND idclient='$id'"));
+      $current_quantite = $check_current_quantite[0];
+      if($current_quantite+$quantite > $stock){
+        header("Location:produits.php?id=".intval($idproduit)."&error");
+      }
+      else{
+        pg_query($conn, "UPDATE panier SET quantite=(SELECT quantite FROM panier WHERE idproduit='$idproduit' AND idclient='$id')+$quantite WHERE idproduit='$idproduit' AND idclient='$id'");
+        header("Location:produits.php?id=".intval($idproduit)."&added");
+      }
     }
     else{
-      pg_query($conn, "INSERT INTO panier(idproduit, idclient, quantite) VALUES ('$idproduit', '$id', '$quantite')");
-      header("Location:produits.php?id=".intval($idproduit)."&added");
+      if($quantite > $stock){
+        header("Location:produits.php?id=".intval($idproduit)."&error");
+      }
+      else{
+        pg_query($conn, "INSERT INTO panier(idproduit, idclient, quantite) VALUES ('$idproduit', '$id', '$quantite')");
+        header("Location:produits.php?id=".intval($idproduit)."&added");
+      }
     }
-  } */
+  } 
 }
 
 
@@ -138,7 +141,7 @@ if(isset($_POST['ajouter'])){
   <!-- Main jumbotron for a primary marketing message or call to action -->
   <div class="jumbotron" style="background-color:#fff;">
     <div class="container">
-    <form>
+    <form method="POST">
       <br>
       <h2>Présentation du produit</h2>
       <br>
